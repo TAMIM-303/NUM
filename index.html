@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMS Number Extractor | Hacker Mode</title>
-    <!-- Excel পড়ার জন্য SheetJS লাইব্রেরি (CDN) -->
+    <title>Smart Number Extractor - Color Edition</title>
+    <!-- SheetJS Library for Excel Parsing -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Variables & Reset --- */
+        /* --- Colorful Gradient Theme --- */
         :root {
-            --bg-color: #0d0d0d;
-            --terminal-green: #00ff41;
-            --terminal-dim: #008f11;
-            --terminal-dark: #003b00;
-            --text-color: #c0c0c0;
-            --border-color: #333;
-            --font-stack: 'Courier New', Courier, monospace;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(to right, #ff512f, #dd2476);
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-light: #666666;
+            --accent-color: #764ba2;
+            --border-radius: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -25,86 +28,94 @@
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--terminal-green);
-            font-family: var(--font-stack);
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-size: cover;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             padding: 20px;
-            overflow-x: hidden;
-            background-image: radial-gradient(circle, #111 0%, #000 100%);
+            color: var(--text-main);
         }
 
-        /* CRT Scanline Effect */
-        body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-
-        /* --- Main Container --- */
+        /* --- Main Card --- */
         .container {
             width: 100%;
-            max-width: 800px;
-            background: #000;
-            border: 2px solid var(--terminal-dim);
-            padding: 2rem;
-            box-shadow: 0 0 20px var(--terminal-dark);
-            position: relative;
-            z-index: 3;
+            max-width: 850px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.6s ease-out;
+            border: 1px solid rgba(255,255,255,0.5);
         }
 
-        /* --- Header --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         header {
-            border-bottom: 1px dashed var(--terminal-dim);
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
             text-align: center;
+            margin-bottom: 30px;
         }
 
         h1 {
-            font-size: 1.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 5px var(--terminal-green);
+            font-size: 2rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
 
         .subtitle {
-            font-size: 0.9rem;
-            color: var(--text-color);
-            margin-top: 5px;
+            color: var(--text-light);
+            font-size: 1rem;
         }
 
         /* --- Upload Area --- */
         .upload-area {
-            border: 2px dashed var(--terminal-dim);
-            padding: 3rem;
+            border: 2px dashed #cbd5e0;
+            border-radius: var(--border-radius);
+            padding: 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: #fafafa;
             position: relative;
-            background: rgba(0, 63, 0, 0.1);
+            overflow: hidden;
         }
 
-        .upload-area:hover, .upload-area.dragover {
-            border-color: var(--terminal-green);
-            background: rgba(0, 63, 0, 0.2);
-            box-shadow: inset 0 0 15px var(--terminal-dark);
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent-color);
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .upload-area:hover::before {
+            transform: scaleX(1);
         }
 
         .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 4rem;
+            color: var(--accent-color);
+            margin-bottom: 15px;
             display: block;
         }
 
@@ -112,135 +123,144 @@
             display: none;
         }
 
-        /* --- Controls & Options --- */
+        /* --- Controls --- */
         .controls {
-            margin-top: 2rem;
+            margin-top: 30px;
             display: none; /* Hidden initially */
-            border-top: 1px solid var(--border-color);
-            padding-top: 1.5rem;
+            background: #fff;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid #eee;
         }
 
-        .control-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
+        .control-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: var(--terminal-green);
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.95rem;
         }
 
-        select, input[type="text"] {
+        select {
             width: 100%;
-            padding: 10px;
-            background: #111;
-            border: 1px solid var(--terminal-dim);
-            color: #fff;
-            font-family: var(--font-stack);
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--text-main);
+            background-color: #fff;
+            cursor: pointer;
             outline: none;
+            transition: border-color 0.2s;
+            font-family: 'Poppins', sans-serif;
         }
 
         select:focus {
-            border-color: var(--terminal-green);
+            border-color: var(--accent-color);
         }
 
         /* --- Preview Area --- */
         .preview-area {
-            margin-top: 1.5rem;
+            margin-top: 25px;
             display: none;
         }
 
         .stats {
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 600;
             font-size: 0.9rem;
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
+            display: inline-block;
         }
 
         textarea {
             width: 100%;
-            height: 150px;
-            background: #050505;
-            border: 1px solid var(--terminal-dim);
-            color: var(--terminal-green);
-            padding: 10px;
-            font-family: var(--font-stack);
+            height: 180px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
             resize: vertical;
-            font-size: 0.9rem;
+            outline: none;
+            background: #fafafa;
+            color: #2d3748;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-color);
+            background: #fff;
         }
 
         /* --- Action Buttons --- */
         .actions {
-            margin-top: 1.5rem;
-            display: flex;
-            gap: 1rem;
-            display: none; /* Hidden initially */
+            margin-top: 25px;
+            display: none;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .btn {
             flex: 1;
-            padding: 12px;
-            border: 1px solid var(--terminal-green);
-            background: transparent;
-            color: var(--terminal-green);
-            font-family: var(--font-stack);
-            font-weight: bold;
-            text-transform: uppercase;
+            min-width: 150px;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .btn:hover {
-            background: var(--terminal-green);
-            color: #000;
-            box-shadow: 0 0 15px var(--terminal-green);
+        .btn:active {
+            transform: scale(0.98);
         }
 
-        .btn:disabled {
-            border-color: #555;
-            color: #555;
-            cursor: not-allowed;
-            box-shadow: none;
-            background: transparent;
+        .btn-copy {
+            background: var(--primary-gradient);
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
         }
 
-        /* --- Status / Log --- */
-        .status-log {
-            margin-top: 2rem;
-            font-size: 0.8rem;
-            color: #666;
-            border-top: 1px dotted #333;
-            padding-top: 10px;
-            min-height: 20px;
-        }
-        
-        .blink {
-            animation: blinker 1s linear infinite;
+        .btn-copy:hover {
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.5);
+            transform: translateY(-2px);
         }
 
-        @keyframes blinker {
-            50% { opacity: 0; }
+        .btn-download {
+            background: var(--secondary-gradient);
+            box-shadow: 0 4px 15px rgba(221, 36, 118, 0.3);
+        }
+
+        .btn-download:hover {
+            box-shadow: 0 6px 20px rgba(221, 36, 118, 0.5);
+            transform: translateY(-2px);
         }
 
         /* --- Toast Notification --- */
         #toast {
             visibility: hidden;
-            min-width: 250px;
-            background-color: var(--terminal-green);
-            color: #000;
+            min-width: 300px;
+            background-color: #333;
+            color: #fff;
             text-align: center;
+            border-radius: 50px;
             padding: 16px;
             position: fixed;
             z-index: 100;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            font-weight: bold;
-            box-shadow: 0 0 20px var(--terminal-green);
-            font-family: var(--font-stack);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-size: 0.95rem;
+            font-weight: 500;
         }
 
         #toast.show {
@@ -258,11 +278,11 @@
             to {bottom: 0; opacity: 0;}
         }
 
-        /* Responsive */
+        /* Mobile Responsive */
         @media (max-width: 600px) {
-            .actions {
-                flex-direction: column;
-            }
+            .container { padding: 20px; }
+            h1 { font-size: 1.5rem; }
+            .actions { flex-direction: column; }
         }
     </style>
 </head>
@@ -270,53 +290,48 @@
 
     <div class="container">
         <header>
-            <h1>&lt;EXTRACTOR_TOOL /&gt;</h1>
-            <div class="subtitle">Excel/CSV থেকে নম্বার এক্সট্রাক্ট করুন</div>
+            <h1>✨ Smart Number Extractor</h1>
+            <div class="subtitle">এক্সেল বা CSV থেকে সহজে নম্বার বের করুন</div>
         </header>
 
         <main>
             <!-- Upload Section -->
             <div class="upload-area" id="dropZone">
                 <span class="upload-icon">📂</span>
-                <h3>ফাইল সিলেক্ট করুন বা ড্র্যাগ করুন</h3>
-                <p style="margin-top:10px; font-size: 0.8rem; color:#666;">Supported: .csv, .xlsx, .xls</p>
+                <h3>ফাইল সিলেক্ট করুন</h3>
+                <p style="color: #888; margin-top: 8px; font-size: 0.9rem;">Supported: .csv, .xlsx, .xls</p>
                 <input type="file" id="fileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
             </div>
 
-            <!-- Options Section -->
+            <!-- Column Selection -->
             <div class="controls" id="controlsArea">
                 <div class="control-group">
-                    <label for="columnSelect">নম্বার কোন কলামে আছে? (Auto-Detected)</label>
+                    <label>নম্বার কোন কলামে আছে? (যেমন: Column D)</label>
                     <select id="columnSelect">
                         <option value="" disabled selected>ফাইল আপলোড করুন...</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Preview & Results -->
+            <!-- Results -->
             <div class="preview-area" id="previewArea">
                 <div class="stats" id="statsDisplay">Total Numbers: 0</div>
                 <textarea id="resultBox" readonly placeholder="নম্বারগুলো এখানে দেখাবে..."></textarea>
             </div>
 
-            <!-- Action Buttons -->
+            <!-- Buttons -->
             <div class="actions" id="actionButtons">
-                <button class="btn" id="copyBtn">📋 Copy All</button>
-                <button class="btn" id="downloadBtn">💾 Download .txt</button>
-            </div>
-
-            <!-- Status Log -->
-            <div class="status-log">
-                <span class="blink">_</span> <span id="statusText">System Ready... Waiting for input.</span>
+                <button class="btn btn-copy" id="copyBtn">📋 Copy All</button>
+                <button class="btn btn-download" id="downloadBtn">💾 Download .txt</button>
             </div>
         </main>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast">Message here</div>
+    <!-- Toast -->
+    <div id="toast">Message</div>
 
     <script>
-        // --- DOM Elements ---
+        // Elements
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const controlsArea = document.getElementById('controlsArea');
@@ -324,63 +339,53 @@
         const previewArea = document.getElementById('previewArea');
         const resultBox = document.getElementById('resultBox');
         const actionButtons = document.getElementById('actionButtons');
-        const statusText = document.getElementById('statusText');
+        const statsDisplay = document.getElementById('statsDisplay');
         const copyBtn = document.getElementById('copyBtn');
         const downloadBtn = document.getElementById('downloadBtn');
-        const statsDisplay = document.getElementById('statsDisplay');
 
-        let extractedData = []; // Store the whole data
-        let headers = [];       // Store headers
-        let currentNumbers = []; // Store extracted numbers
+        let extractedData = [];
+        let headers = [];
+        let currentNumbers = [];
 
-        // --- Event Listeners ---
-        
-        // Click to upload
+        // --- Events ---
         dropZone.addEventListener('click', () => fileInput.click());
 
-        // File Input Change
         fileInput.addEventListener('change', handleFileSelect);
 
-        // Drag & Drop Effects
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropZone.classList.add('dragover');
-            updateStatus("File detected... Release to upload.");
+            dropZone.style.borderColor = '#764ba2';
+            dropZone.style.background = '#fff';
         });
 
         dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-            updateStatus("System Ready... Waiting for input.");
+            dropZone.style.borderColor = '#cbd5e0';
+            dropZone.style.background = '#fafafa';
         });
 
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropZone.classList.remove('dragover');
+            dropZone.style.borderColor = '#cbd5e0';
+            dropZone.style.background = '#fafafa';
             if (e.dataTransfer.files.length) {
                 fileInput.files = e.dataTransfer.files;
                 handleFileSelect();
             }
         });
 
-        // Column Selection Change
         columnSelect.addEventListener('change', () => {
             extractNumbers(columnSelect.value);
         });
 
-        // Copy Button
         copyBtn.addEventListener('click', () => {
-            if (!currentNumbers.length) return;
+            if(!currentNumbers.length) return;
             navigator.clipboard.writeText(currentNumbers.join('\n')).then(() => {
-                showToast("নম্বারগুলো কপি হয়েছে!");
-                updateStatus("Data copied to clipboard.");
-            }).catch(() => {
-                showToast("কপি করতে সমস্যা হয়েছে!");
+                showToast("কপি সফল হয়েছে!");
             });
         });
 
-        // Download Button
         downloadBtn.addEventListener('click', () => {
-            if (!currentNumbers.length) return;
+            if(!currentNumbers.length) return;
             const blob = new Blob([currentNumbers.join('\n')], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -390,67 +395,59 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            updateStatus("File downloaded successfully.");
+            showToast("ফাইল ডাউনলোড শুরু হয়েছে...");
         });
 
-        // --- Functions ---
+        // --- Logic ---
 
-        function updateStatus(msg) {
-            statusText.textContent = msg;
-        }
-
-        function showToast(message) {
+        function showToast(msg) {
             const toast = document.getElementById("toast");
-            toast.textContent = message;
+            toast.textContent = msg;
             toast.className = "show";
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function getColumnName(num) {
+            // 0 -> A, 3 -> D, etc.
+            let letters = '';
+            while (num >= 0) {
+                letters = String.fromCharCode((num % 26) + 65) + letters;
+                num = Math.floor(num / 26) - 1;
+            }
+            return letters;
         }
 
         function handleFileSelect() {
             const file = fileInput.files[0];
             if (!file) return;
 
-            updateStatus(`Processing: ${file.name}...`);
-            
-            const reader = new FileReader();
-
             if (file.name.endsWith('.csv')) {
+                const reader = new FileReader();
                 reader.onload = (e) => processCSV(e.target.result);
                 reader.readAsText(file);
             } else if (file.name.match(/\.(xls|xlsx)$/)) {
                 if(typeof XLSX === 'undefined') {
-                    showToast("ইন্টারনেট সংযোগ নেই! Excel পড়তে SheetJS লাইব্রেরি প্রয়োজন।");
-                    updateStatus("Error: Library not loaded.");
+                    showToast("ইন্টারনেট সংযোগ দরকার!");
                     return;
                 }
+                const reader = new FileReader();
                 reader.onload = (e) => processExcel(e.target.result);
                 reader.readAsBinaryString(file);
             } else {
-                showToast("শুধুমাত্র CSV বা Excel ফাইল সাপোর্ট করে!");
-                updateStatus("Invalid file format.");
+                showToast("সাপোর্টেড ফাইল দিন (CSV/Excel)");
             }
         }
 
         function processCSV(csvText) {
-            // Simple CSV parser
             const lines = csvText.split(/\r\n|\n/);
-            if (lines.length < 2) {
-                updateStatus("Empty file or invalid format.");
-                return;
-            }
-
-            // Assuming first row is header
-            headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-            
+            if (lines.length < 2) return;
+            headers = lines[0].split(',').map(h => h.trim());
             extractedData = [];
             for (let i = 1; i < lines.length; i++) {
                 if(!lines[i].trim()) continue;
-                // Handle quotes in CSV simply (not full RFC 4180 compliant but good for simple needs)
-                const row = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
-                extractedData.push(row);
+                extractedData.push(lines[i].split(',').map(v => v.trim()));
             }
-
-            populateColumnSelect();
+            populateSelect();
         }
 
         function processExcel(data) {
@@ -458,88 +455,70 @@
                 const workbook = XLSX.read(data, { type: 'binary' });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-                
-                // Convert to JSON (Array of Arrays)
                 const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 
-                if (json.length < 1) {
-                    updateStatus("Empty Excel file.");
-                    return;
-                }
+                if (json.length < 1) return;
 
-                headers = json[0].map(h => (h || "").toString().trim());
+                headers = json[0].map(h => (h ? h.toString() : "").trim());
                 extractedData = json.slice(1);
-
-                populateColumnSelect();
+                populateSelect();
             } catch (err) {
                 console.error(err);
-                updateStatus("Error parsing Excel file.");
-                showToast("ফাইল পার্স করতে সমস্যা হয়েছে!");
+                showToast("ফাইল পড়তে সমস্যা হয়েছে");
             }
         }
 
-        function populateColumnSelect() {
+        function populateSelect() {
             columnSelect.innerHTML = '';
             
             if (!headers.length) {
-                updateStatus("No headers found.");
+                showToast("ফাইলে কোনো ডেটা নেই");
                 return;
             }
 
-            let bestMatchIndex = -1;
-            let highestScore = 0;
+            // Smart detection for "D" column or Number column
+            let targetIndex = -1;
 
             headers.forEach((header, index) => {
+                const colLetter = getColumnName(index);
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = header;
+                // Show "Column A - HeaderName" format
+                option.textContent = `Column ${colLetter} ${header ? `(${header})` : ''}`;
                 columnSelect.appendChild(option);
 
-                // Auto-Detection Logic
-                let score = 0;
+                // Auto-detect logic
+                let isNumberCol = false;
                 const lowerHeader = header.toLowerCase();
                 
-                // 1. Check Header Name
-                if (lowerHeader.includes('number') || lowerHeader.includes('phone') || lowerHeader.includes('mobile') || lowerHeader.includes('contact')) {
-                    score += 10;
+                if (lowerHeader.includes('number') || lowerHeader.includes('phone') || lowerHeader.includes('mobile')) {
+                    isNumberCol = true;
                 }
                 
-                // 2. Check Data Sample (First 5 rows)
-                let digitCount = 0;
-                let validRows = 0;
-                for (let i = 0; i < Math.min(5, extractedData.length); i++) {
-                    const val = extractedData[i][index];
-                    if (val) {
-                        validRows++;
-                        // Check if value is mostly digits
-                        if (/^\+?\d+$/.test(val.toString().trim())) {
-                            digitCount++;
-                        }
-                    }
-                }
-                
-                if (validRows > 0 && (digitCount / validRows) > 0.8) {
-                    score += 5;
+                // Specific user request: D column (Index 3)
+                if (index === 3) {
+                    // Give D column priority if nothing else matches strongly
+                    if(targetIndex === -1) targetIndex = index;
                 }
 
-                if (score > highestScore) {
-                    highestScore = score;
-                    bestMatchIndex = index;
-                }
+                if (isNumberCol) targetIndex = index;
             });
 
-            // Show Controls
             controlsArea.style.display = 'block';
-            updateStatus("File loaded. Analyzing columns...");
-
-            // Select best match
-            if (bestMatchIndex !== -1) {
-                columnSelect.value = bestMatchIndex;
-                extractNumbers(bestMatchIndex);
+            
+            // Auto select if found
+            if (targetIndex !== -1) {
+                columnSelect.value = targetIndex;
+                extractNumbers(targetIndex);
             } else {
-                // Default to first column if no match
-                columnSelect.selectedIndex = 0;
-                extractNumbers(0);
+                // Default to Column D (index 3) if exists, else first col
+                if (headers.length > 3) {
+                    columnSelect.value = 3;
+                    extractNumbers(3);
+                } else {
+                    columnSelect.selectedIndex = 0;
+                    extractNumbers(0);
+                }
             }
         }
 
@@ -548,22 +527,23 @@
             currentNumbers = [];
             
             extractedData.forEach(row => {
-                if (row[colIndex]) {
-                    let val = row[colIndex].toString().trim();
-                    // Basic cleaning: Remove non-digit chars except + at start
-                    if (val.length > 5) { // Ignore short numbers
-                        currentNumbers.push(val);
+                const val = row[colIndex];
+                if (val) {
+                    let cleanVal = val.toString().trim();
+                    // Remove spaces, quotes
+                    cleanVal = cleanVal.replace(/^"|"$/g, '').replace(/\s+/g, '');
+                    
+                    // Basic check if it looks like a number (length > 5)
+                    if (cleanVal.length > 5) {
+                        currentNumbers.push(cleanVal);
                     }
                 }
             });
 
-            // Display results
             previewArea.style.display = 'block';
             actionButtons.style.display = 'flex';
             resultBox.value = currentNumbers.join('\n');
             statsDisplay.textContent = `Total Numbers Found: ${currentNumbers.length}`;
-            
-            updateStatus(`Extraction complete. Found ${currentNumbers.length} numbers.`);
         }
 
     </script>
