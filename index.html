@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Number Extractor | Hacker Mode</title>
+    <!-- Excel পড়ার জন্য SheetJS লাইব্রেরি (CDN) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        /* --- CSS Variables & Reset --- */
+        :root {
+            --bg-color: #0d0d0d;
+            --terminal-green: #00ff41;
+            --terminal-dim: #008f11;
+            --terminal-dark: #003b00;
+            --text-color: #c0c0c0;
+            --border-color: #333;
+            --font-stack: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--terminal-green);
+            font-family: var(--font-stack);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle, #111 0%, #000 100%);
+        }
+
+        /* CRT Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* --- Main Container --- */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #000;
+            border: 2px solid var(--terminal-dim);
+            padding: 2rem;
+            box-shadow: 0 0 20px var(--terminal-dark);
+            position: relative;
+            z-index: 3;
+        }
+
+        /* --- Header --- */
+        header {
+            border-bottom: 1px dashed var(--terminal-dim);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px var(--terminal-green);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            margin-top: 5px;
+        }
+
+        /* --- Upload Area --- */
+        .upload-area {
+            border: 2px dashed var(--terminal-dim);
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: rgba(0, 63, 0, 0.1);
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--terminal-green);
+            background: rgba(0, 63, 0, 0.2);
+            box-shadow: inset 0 0 15px var(--terminal-dark);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* --- Controls & Options --- */
+        .controls {
+            margin-top: 2rem;
+            display: none; /* Hidden initially */
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--terminal-green);
+            font-weight: bold;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            background: #111;
+            border: 1px solid var(--terminal-dim);
+            color: #fff;
+            font-family: var(--font-stack);
+            outline: none;
+        }
+
+        select:focus {
+            border-color: var(--terminal-green);
+        }
+
+        /* --- Preview Area --- */
+        .preview-area {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .stats {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: #050505;
+            border: 1px solid var(--terminal-dim);
+            color: var(--terminal-green);
+            padding: 10px;
+            font-family: var(--font-stack);
+            resize: vertical;
+            font-size: 0.9rem;
+        }
+
+        /* --- Action Buttons --- */
+        .actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            display: none; /* Hidden initially */
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--terminal-green);
+            background: transparent;
+            color: var(--terminal-green);
+            font-family: var(--font-stack);
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: var(--terminal-green);
+            color: #000;
+            box-shadow: 0 0 15px var(--terminal-green);
+        }
+
+        .btn:disabled {
+            border-color: #555;
+            color: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+            background: transparent;
+        }
+
+        /* --- Status / Log --- */
+        .status-log {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px dotted #333;
+            padding-top: 10px;
+            min-height: 20px;
+        }
+        
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        /* --- Toast Notification --- */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--terminal-green);
+            color: #000;
+            text-align: center;
+            padding: 16px;
+            position: fixed;
+            z-index: 100;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            box-shadow: 0 0 20px var(--terminal-green);
+            font-family: var(--font-stack);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>&lt;EXTRACTOR_TOOL /&gt;</h1>
+            <div class="subtitle">Excel/CSV থেকে নম্বার এক্সট্রাক্ট করুন</div>
+        </header>
+
+        <main>
+            <!-- Upload Section -->
+            <div class="upload-area" id="dropZone">
+                <span class="upload-icon">📂</span>
+                <h3>ফাইল সিলেক্ট করুন বা ড্র্যাগ করুন</h3>
+                <p style="margin-top:10px; font-size: 0.8rem; color:#666;">Supported: .csv, .xlsx, .xls</p>
+                <input type="file" id="fileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+            </div>
+
+            <!-- Options Section -->
+            <div class="controls" id="controlsArea">
+                <div class="control-group">
+                    <label for="columnSelect">নম্বার কোন কলামে আছে? (Auto-Detected)</label>
+                    <select id="columnSelect">
+                        <option value="" disabled selected>ফাইল আপলোড করুন...</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Preview & Results -->
+            <div class="preview-area" id="previewArea">
+                <div class="stats" id="statsDisplay">Total Numbers: 0</div>
+                <textarea id="resultBox" readonly placeholder="নম্বারগুলো এখানে দেখাবে..."></textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions" id="actionButtons">
+                <button class="btn" id="copyBtn">📋 Copy All</button>
+                <button class="btn" id="downloadBtn">💾 Download .txt</button>
+            </div>
+
+            <!-- Status Log -->
+            <div class="status-log">
+                <span class="blink">_</span> <span id="statusText">System Ready... Waiting for input.</span>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">Message here</div>
+
+    <script>
+        // --- DOM Elements ---
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const controlsArea = document.getElementById('controlsArea');
+        const columnSelect = document.getElementById('columnSelect');
+        const previewArea = document.getElementById('previewArea');
+        const resultBox = document.getElementById('resultBox');
+        const actionButtons = document.getElementById('actionButtons');
+        const statusText = document.getElementById('statusText');
+        const copyBtn = document.getElementById('copyBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statsDisplay = document.getElementById('statsDisplay');
+
+        let extractedData = []; // Store the whole data
+        let headers = [];       // Store headers
+        let currentNumbers = []; // Store extracted numbers
+
+        // --- Event Listeners ---
+        
+        // Click to upload
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // File Input Change
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag & Drop Effects
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+            updateStatus("File detected... Release to upload.");
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+            updateStatus("System Ready... Waiting for input.");
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
+
+        // Column Selection Change
+        columnSelect.addEventListener('change', () => {
+            extractNumbers(columnSelect.value);
+        });
+
+        // Copy Button
+        copyBtn.addEventListener('click', () => {
+            if (!currentNumbers.length) return;
+            navigator.clipboard.writeText(currentNumbers.join('\n')).then(() => {
+                showToast("নম্বারগুলো কপি হয়েছে!");
+                updateStatus("Data copied to clipboard.");
+            }).catch(() => {
+                showToast("কপি করতে সমস্যা হয়েছে!");
+            });
+        });
+
+        // Download Button
+        downloadBtn.addEventListener('click', () => {
+            if (!currentNumbers.length) return;
+            const blob = new Blob([currentNumbers.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted_numbers.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            updateStatus("File downloaded successfully.");
+        });
+
+        // --- Functions ---
+
+        function updateStatus(msg) {
+            statusText.textContent = msg;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            updateStatus(`Processing: ${file.name}...`);
+            
+            const reader = new FileReader();
+
+            if (file.name.endsWith('.csv')) {
+                reader.onload = (e) => processCSV(e.target.result);
+                reader.readAsText(file);
+            } else if (file.name.match(/\.(xls|xlsx)$/)) {
+                if(typeof XLSX === 'undefined') {
+                    showToast("ইন্টারনেট সংযোগ নেই! Excel পড়তে SheetJS লাইব্রেরি প্রয়োজন।");
+                    updateStatus("Error: Library not loaded.");
+                    return;
+                }
+                reader.onload = (e) => processExcel(e.target.result);
+                reader.readAsBinaryString(file);
+            } else {
+                showToast("শুধুমাত্র CSV বা Excel ফাইল সাপোর্ট করে!");
+                updateStatus("Invalid file format.");
+            }
+        }
+
+        function processCSV(csvText) {
+            // Simple CSV parser
+            const lines = csvText.split(/\r\n|\n/);
+            if (lines.length < 2) {
+                updateStatus("Empty file or invalid format.");
+                return;
+            }
+
+            // Assuming first row is header
+            headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            
+            extractedData = [];
+            for (let i = 1; i < lines.length; i++) {
+                if(!lines[i].trim()) continue;
+                // Handle quotes in CSV simply (not full RFC 4180 compliant but good for simple needs)
+                const row = lines[i].split(',').map(val => val.trim().replace(/^"|"$/g, ''));
+                extractedData.push(row);
+            }
+
+            populateColumnSelect();
+        }
+
+        function processExcel(data) {
+            try {
+                const workbook = XLSX.read(data, { type: 'binary' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Convert to JSON (Array of Arrays)
+                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                if (json.length < 1) {
+                    updateStatus("Empty Excel file.");
+                    return;
+                }
+
+                headers = json[0].map(h => (h || "").toString().trim());
+                extractedData = json.slice(1);
+
+                populateColumnSelect();
+            } catch (err) {
+                console.error(err);
+                updateStatus("Error parsing Excel file.");
+                showToast("ফাইল পার্স করতে সমস্যা হয়েছে!");
+            }
+        }
+
+        function populateColumnSelect() {
+            columnSelect.innerHTML = '';
+            
+            if (!headers.length) {
+                updateStatus("No headers found.");
+                return;
+            }
+
+            let bestMatchIndex = -1;
+            let highestScore = 0;
+
+            headers.forEach((header, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = header;
+                columnSelect.appendChild(option);
+
+                // Auto-Detection Logic
+                let score = 0;
+                const lowerHeader = header.toLowerCase();
+                
+                // 1. Check Header Name
+                if (lowerHeader.includes('number') || lowerHeader.includes('phone') || lowerHeader.includes('mobile') || lowerHeader.includes('contact')) {
+                    score += 10;
+                }
+                
+                // 2. Check Data Sample (First 5 rows)
+                let digitCount = 0;
+                let validRows = 0;
+                for (let i = 0; i < Math.min(5, extractedData.length); i++) {
+                    const val = extractedData[i][index];
+                    if (val) {
+                        validRows++;
+                        // Check if value is mostly digits
+                        if (/^\+?\d+$/.test(val.toString().trim())) {
+                            digitCount++;
+                        }
+                    }
+                }
+                
+                if (validRows > 0 && (digitCount / validRows) > 0.8) {
+                    score += 5;
+                }
+
+                if (score > highestScore) {
+                    highestScore = score;
+                    bestMatchIndex = index;
+                }
+            });
+
+            // Show Controls
+            controlsArea.style.display = 'block';
+            updateStatus("File loaded. Analyzing columns...");
+
+            // Select best match
+            if (bestMatchIndex !== -1) {
+                columnSelect.value = bestMatchIndex;
+                extractNumbers(bestMatchIndex);
+            } else {
+                // Default to first column if no match
+                columnSelect.selectedIndex = 0;
+                extractNumbers(0);
+            }
+        }
+
+        function extractNumbers(colIndex) {
+            colIndex = parseInt(colIndex);
+            currentNumbers = [];
+            
+            extractedData.forEach(row => {
+                if (row[colIndex]) {
+                    let val = row[colIndex].toString().trim();
+                    // Basic cleaning: Remove non-digit chars except + at start
+                    if (val.length > 5) { // Ignore short numbers
+                        currentNumbers.push(val);
+                    }
+                }
+            });
+
+            // Display results
+            previewArea.style.display = 'block';
+            actionButtons.style.display = 'flex';
+            resultBox.value = currentNumbers.join('\n');
+            statsDisplay.textContent = `Total Numbers Found: ${currentNumbers.length}`;
+            
+            updateStatus(`Extraction complete. Found ${currentNumbers.length} numbers.`);
+        }
+
+    </script>
+</body>
+</html>
